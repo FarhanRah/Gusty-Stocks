@@ -3,8 +3,9 @@ import requests
 import webbrowser
 import smtplib
 import tkinter.messagebox
+import config
 
-API_KEY = "c1jrhpv48v6o1292jing"
+API_KEY = config.STOCK_API_KEY
 CURRENT_STOCK_NAME = "FARHAN"
 stock_window = None
 
@@ -148,7 +149,7 @@ def create_window(stock_price, stock_name):
     heading3 = tkinter.Label(stock_window, text="Top 3 News:", bg="black", fg="white",
                              width=56, font=("Fixedsys", 12))
     canvas3.create_window(227, 10, window=heading3)
-    p = {"q": stock_name["result"][0]["description"], "apiKey": "78986d36cd1f47b2964caa7babf077e1"}
+    p = {"q": stock_name["result"][0]["description"], "apiKey": config.NEWS_API_KEY}
     news_api = requests.get(url="https://newsapi.org/v2/everything", params=p).json()
     news1 = tkinter.Label(stock_window, text=f'By: {news_api["articles"][0]["author"]} - Click here...', font=("Arial", 10, "bold"))
     canvas3.create_window(219, 42, window=news1, width=420)
@@ -212,7 +213,7 @@ def sending_email():
     if user_email is not None:
         with smtplib.SMTP("smtp.gmail.com", 587, timeout=120) as connection:
             connection.starttls()
-            connection.login("ahmedtye16@gmail.com", "Beaconhouse")
+            connection.login(config.EMAIL, config.PASSWORD)
             message = "Hello!"
             connection.sendmail(from_addr="ahmedtye16@gmail.com", to_addrs=user_email, msg=message)
         print("[DEVELOPER] Email has been sent successfully!")
