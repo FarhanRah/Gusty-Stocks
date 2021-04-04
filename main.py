@@ -1,6 +1,8 @@
 import tkinter
 import requests
 import webbrowser
+import smtplib
+import tkinter.messagebox
 
 API_KEY = "c1jrhpv48v6o1292jing"
 CURRENT_STOCK_NAME = "FARHAN"
@@ -200,6 +202,25 @@ def adding_email():
         status_message.config(text="Please enter an email...", font=("Arial", 9, "bold"), fg="#e75151")
 
 
+def sending_email():
+    try:
+        with open("./files/email.txt") as email_file:
+            user_email = email_file.read().splitlines()
+    except FileNotFoundError:
+        user_email = None
+
+    if user_email is not None:
+        with smtplib.SMTP("smtp.gmail.com", 587, timeout=120) as connection:
+            connection.starttls()
+            connection.login("ahmedtye16@gmail.com", "Beaconhouse")
+            message = "Hello!"
+            connection.sendmail(from_addr="ahmedtye16@gmail.com", to_addrs=user_email, msg=message)
+        print("[DEVELOPER] Email has been sent successfully!")
+    else:
+        tkinter.messagebox.showerror(title="No Email", message="You have not added any email yet. Please go back to "
+                                                               "the home screen and click on 'Add Email'")
+
+
 window = tkinter.Tk()
 window.title("Gusty Stocks")
 window.minsize(width=800, height=600)
@@ -225,7 +246,7 @@ search_logo = main_canvas.create_window(710, 339, window=search_logo_button)
 send_email_image = tkinter.PhotoImage(file="images/send.png")
 send_email = main_canvas.create_image(340, 400, image=send_email_image)
 
-send_email_button = tkinter.Button(text="Send Email", highlightthickness=4, font=("Arial", 8, "bold"))
+send_email_button = tkinter.Button(text="Send Email", highlightthickness=4, font=("Arial", 8, "bold"), command=sending_email)
 main_canvas.create_window(340, 440, window=send_email_button)
 
 add_email_image = tkinter.PhotoImage(file="images/email.png")
