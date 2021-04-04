@@ -6,7 +6,7 @@ API_KEY = "c1jrhpv48v6o1292jing"
 CURRENT_STOCK_NAME = "FARHAN"
 stock_window = None
 
-# global write_email, status_message
+global write_email, status_message
 
 
 def toggle_subscription():
@@ -163,22 +163,10 @@ def create_window(stock_price, stock_name):
     canvas3.place(x=70, y=260)
 
 
-def add_email():
-    print("test")
-    # global write_email, status_message
-    # if write_email.get():
-    #     with open("./files/email.txt", mode="w") as email_file:
-    #         email_file.write(write_email.get())
-    #     status_message.config(text="Email successfully added to our database...", font=("Arial", 9, "bold"), fg="#1fa743")
-    #     write_email.delete(0, tkinter.END)
-    # else:
-    #     status_message.config(text="Please enter an email...", font=("Arial", 9, "bold"), fg="#e75151")
-
-
 def create_email_window():
-    # global write_email, status_message
+    global write_email, status_message
     email_window = tkinter.Toplevel()
-    email_window.minsize(width=430, height=10)
+    email_window.geometry("430x140")
     email_window.resizable(0, 0)
     email_window.focus_force()
 
@@ -192,13 +180,24 @@ def create_email_window():
     write_email.focus()
 
     add_image = tkinter.PhotoImage(master=email_window, file="./images/add_email.png")
-    add_button = tkinter.Button(master=email_window, image=add_image, highlightthickness=0, bd=0, command=add_email)
+    add_button = tkinter.Button(master=email_window, image=add_image, highlightthickness=0, bd=0, command=adding_email)
     add_button.photo = add_image
     add_button.place(x=368, y=66.5)
 
     # Empty placeholder
-    # status_message = tkinter.Label(email_window, text="Test testt")
-    # status_message.place(x=22, y=15)
+    status_message = tkinter.Label(email_window, text="")
+    status_message.place(x=22, y=103)
+
+
+def adding_email():
+    global write_email, status_message
+    if write_email.get():
+        with open("./files/email.txt", mode="w") as file:
+            file.write(write_email.get())
+        status_message.config(text="Email successfully added to our database...", font=("Arial", 9, "bold"), fg="#1fa743")
+        write_email.delete(0, tkinter.END)
+    else:
+        status_message.config(text="Please enter an email...", font=("Arial", 9, "bold"), fg="#e75151")
 
 
 window = tkinter.Tk()
