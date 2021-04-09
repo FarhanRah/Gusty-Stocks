@@ -5,12 +5,19 @@ import smtplib
 import tkinter.messagebox
 import os
 from dotenv import load_dotenv
+# Modules for email formatting
+from email import encoders
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email.mime.image import MIMEImage
 
 load_dotenv("C:\\Users\\farha\\OneDrive\\Desktop\\Projects\\Gusty Stocks\\.env")
 
 API_KEY = os.getenv("STOCK_API_KEY")
 CURRENT_STOCK_NAME = "FARHAN"
 stock_window = None
+CURRENT_INDEX = -1
 
 global write_email, status_message
 
@@ -206,19 +213,67 @@ def adding_email():
         status_message.config(text="Please enter an email...", font=("Arial", 9, "bold"), fg="#e75151")
 
 
+def current_stock(stock_codes):
+    global CURRENT_INDEX
+    CURRENT_INDEX += 1
+    return f"{stock_codes[CURRENT_INDEX]}<br>&nbsp;"
+
+
 def sending_email():
+    try:
+        with open("./files/stocks.txt") as file:
+            stock_codes = file.read().splitlines()
+    except FileNotFoundError:
+        stock_codes = ['Please add some stocks']
+
     try:
         with open("./files/email.txt") as email_file:
             user_email = email_file.read().splitlines()
     except FileNotFoundError:
         user_email = None
 
+    msg_root = MIMEMultipart('related')
+    msg_root['Subject'] = 'Stock info - Gusty Stocks'
+    msg_root.preamble = 'Multi-part message in MIME format.'
+
+    msg_alternative = MIMEMultipart('alternative')
+    msg_root.attach(msg_alternative)
+
+    msg_text = MIMEText('Alternative plain text message.')
+    msg_alternative.attach(msg_text)
+
+    # Converting the stock_codes into a string separated into separate lines
+    str_stocks = ""
+    for n in range(len(stock_codes)):
+        if n == len(stock_codes) - 1:
+            str_stocks += stock_codes[n]
+        else:
+            str_stocks += (stock_codes[n] + ", ")
+
+    msg_text = MIMEText(f'<img src="cid:image1"><br><h3>Hello!'
+                        f'<br><br>These are the stocks you are currently subscribed to:<br>'
+                        f'&nbsp;&nbsp;&nbsp;&nbsp;<a rel="nofollow" style="text-decoration:none; color:#333">{str_stocks}</a>'
+                        f'<br>If you would like to see some top news regarding any stock or if you would like to add'
+                        f' more stocks, simply head over to our app and search for the stock.'
+                        f'<br><br>Have a great day!'
+                        f'<br>Email sent by: Farhan Ali Rahmoon, <a href="https://rahmoon.com/">rahmoon.com</a></h3>', 'html')
+    msg_alternative.attach(msg_text)
+
+    # Attach Image
+    fp = open('./images/email_logo.png', 'rb')  # Read image
+    msg_image = MIMEImage(fp.read())
+    fp.close()
+
+    # Define the image's ID as referenced above
+    msg_image.add_header('Content-ID', '<image1>')
+    msg_root.attach(msg_image)
+
     if user_email is not None:
         with smtplib.SMTP("smtp.gmail.com", 587, timeout=120) as connection:
             connection.starttls()
             connection.login(os.getenv("EMAIL"), os.getenv("PASSWORD"))
             message = "Hello!"
-            connection.sendmail(from_addr="ahmedtye16@gmail.com", to_addrs=user_email, msg=message)
+            connection.sendmail(from_addr="ahmedtye16@gmail.com", to_addrs=user_email, msg=msg_root.as_string())
         print("[DEVELOPER] Email has been sent successfully!")
     else:
         tkinter.messagebox.showerror(title="No Email", message="You have not added any email yet. Please go back to "
