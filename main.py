@@ -213,12 +213,6 @@ def adding_email():
         status_message.config(text="Please enter an email...", font=("Arial", 9, "bold"), fg="#e75151")
 
 
-def current_stock(stock_codes):
-    global CURRENT_INDEX
-    CURRENT_INDEX += 1
-    return f"{stock_codes[CURRENT_INDEX]}<br>&nbsp;"
-
-
 def sending_email():
     try:
         with open("./files/stocks.txt") as file:
@@ -234,6 +228,7 @@ def sending_email():
 
     msg_root = MIMEMultipart('related')
     msg_root['Subject'] = 'Stock info - Gusty Stocks'
+    msg_root['From'] = os.getenv("EMAIL")
     msg_root.preamble = 'Multi-part message in MIME format.'
 
     msg_alternative = MIMEMultipart('alternative')
@@ -269,11 +264,10 @@ def sending_email():
     msg_root.attach(msg_image)
 
     if user_email is not None:
-        with smtplib.SMTP("smtp.gmail.com", 587, timeout=120) as connection:
+        with smtplib.SMTP("smtp.ionos.com", 587, timeout=120) as connection:
             connection.starttls()
             connection.login(os.getenv("EMAIL"), os.getenv("PASSWORD"))
-            message = "Hello!"
-            connection.sendmail(from_addr="ahmedtye16@gmail.com", to_addrs=user_email, msg=msg_root.as_string())
+            connection.sendmail(from_addr=os.getenv("EMAIL"), to_addrs=user_email, msg=msg_root.as_string())
         print("[DEVELOPER] Email has been sent successfully!")
     else:
         tkinter.messagebox.showerror(title="No Email", message="You have not added any email yet. Please go back to "
